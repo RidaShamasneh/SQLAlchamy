@@ -72,9 +72,28 @@ class GenericTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole and Qt_Orientation == Qt.Horizontal:
             return self._headers[p_int]
 
+    def update_fkeys(self):
+        return []
+
+    def __validate_nullable(self):
+        errors_list = []
+        d = []
+        for item in self._array_data:
+            for field in self.nullable_list:
+                if not getattr(item, field):
+                    d.append(item)
+                    errors_list.append(
+                        "Field \"{}\" in table \"{}\" not allowed to be none, row removed from insertion".format(field,
+                                                                                                                 self._table_name))
+        for item in d:
+            self._array_data.remove(item)
+        return errors_list
+
+    def validate_before_insert(self):
+        return self.__validate_nullable() + self.update_fkeys()
+
     def save_data(self):
-        error_list = []
-        # error_list = self.validate_before_insert()
+        error_list = self.validate_before_insert()
         try:
             self._crystal_ball_table.insert_and_commit(self._array_data)
             self.__empty_rows_count = 1

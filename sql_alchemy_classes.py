@@ -23,6 +23,15 @@ class Author(declarative_base_class.base):
     def name(self, val):
         self._name = val
 
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return False
+
+        return [self.id, self.name] == [other.id, other.name]
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
 
 class Book(declarative_base_class.base):
     __tablename__ = 'book'
@@ -68,7 +77,9 @@ class Book(declarative_base_class.base):
 
     @property
     def author_marking(self):
-        return self.author.name
+        if self.author is not None:
+            return self.author.name
+        return self._author_marking
 
     @author_marking.setter
     def author_marking(self, val):
@@ -81,6 +92,9 @@ class Book(declarative_base_class.base):
             self.author_id = None
             self.author = None
 
+    def set_fkeys(self):
+        self.__set_author_fkey()
+
     def __set_author_fkey(self):
         if self._author_marking is not '' and self._author_marking is not None:
             # todo: needs refactoring on how to set the id
@@ -92,3 +106,13 @@ class Book(declarative_base_class.base):
                 self.author_id = result.id
                 return
             raise Exception("{} in table {} is Not Found as primary key".format(self._author_marking, 'Primary'))
+
+    def __eq__(self, other):
+        if type(self) is not type(other):
+            return False
+
+        return [self.isbn, self.title, self.price, self.author_id] == \
+               [other.isbn, other.title, other.price, other.author_id]
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
