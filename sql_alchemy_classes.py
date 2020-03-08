@@ -1,5 +1,5 @@
 from sqlalchemy import Column, String, VARCHAR, ForeignKey
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 from sqlalchemy.dialects.mysql import INTEGER
 
 import declarative_base_class
@@ -33,6 +33,14 @@ class Book(declarative_base_class.base):
     author_id = Column(INTEGER, ForeignKey(Author.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     author = relationship("Author", lazy='selectin')
     _author_marking = ''
+
+    @validates('_price')
+    def validate_price(self, key, value):
+        if value is not None:
+            price = int(value)
+            assert price >= 0, "price '{}' should be positive".format(value)
+            return price
+        return 0
 
     @property
     def isbn(self):
