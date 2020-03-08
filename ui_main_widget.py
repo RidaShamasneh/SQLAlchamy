@@ -9,6 +9,7 @@ from table_model_factory import TableModelFactory
 class UIMainWidget(QWidget):
     def __init__(self, main_window):
         QWidget.__init__(self)
+        self.__main_window = main_window
         self.__setup_ui()
 
     def __setup_ui(self):
@@ -62,3 +63,29 @@ class UIMainWidget(QWidget):
         self.__tab_widget.setCurrentWidget(widget)
         # Disable close button for tab
         self.__tab_widget.tabBar().setTabButton(self.__tab_widget.count() - 1, QTabBar.RightSide, None)
+
+    def __window_enabled(self, is_enabled):
+        self.__tab_widget.setEnabled(is_enabled)
+        self.__main_window.menuBar().setEnabled(is_enabled)
+        self.__loading_indicator_label.setHidden(is_enabled)
+
+    def __get_specific_type_widgets(self, widget_type):
+        tabs_count = self.__tab_widget.count()
+        for tab_index in range(tabs_count):
+            widget = self.__tab_widget.widget(tab_index)
+            if isinstance(widget, widget_type):
+                yield widget
+
+    def refresh_all_tabs(self):
+        warnings_list = []
+        self.__window_enabled(False)
+        for tab in self.__get_specific_type_widgets(GenericTableTabWidget):
+            warnings_list.append(tab.refresh_data(display_warning=False))
+
+        warnings_list = '\n'.join(filter(None, warnings_list))
+        # if warnings_list:
+        #     CBMessageBoxes.popup_message(icon=CBMessageBoxes.WARNING,
+        #                                  title="Failure while refreshing all tabs",
+        #                                  text="An error occurred while refreshing database. Please try again later",
+        #                                  detailed_text=warnings_list)
+        self.__window_enabled(True)

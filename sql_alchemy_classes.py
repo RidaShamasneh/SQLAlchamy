@@ -9,7 +9,19 @@ class Author(declarative_base_class.base):
     __tablename__ = 'author'
     id = Column(INTEGER, primary_key=True, autoincrement=True)
     _name = Column(VARCHAR(255), nullable=False)
-    books = relationship("Book")
+
+    # 'lazy' : selectin - items should be loaded 'eagerly' as the parents are loaded, using one or more additional
+    # SQL statements, which issues a JOIN to the immediate parent object, specifying primary key identifiers using an IN clause.
+    # https://docs.sqlalchemy.org/en/13/orm/relationship_api.html?highlight=relationship#sqlalchemy.orm.relationship
+    books = relationship("Book", lazy='selectin')
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, val):
+        self._name = val
 
 
 class Book(declarative_base_class.base):
@@ -19,7 +31,7 @@ class Book(declarative_base_class.base):
     _title = Column(String(60), nullable=False)
     _price = Column(INTEGER, nullable=False)
     author_id = Column(INTEGER, ForeignKey(Author.id, ondelete='CASCADE', onupdate='CASCADE'))
-    author = relationship("Author")
+    author = relationship("Author", lazy='selectin')
 
     @property
     def isbn(self):
@@ -44,3 +56,7 @@ class Book(declarative_base_class.base):
     @price.setter
     def price(self, val):
         self._price = val
+
+    @property
+    def author_marking(self):
+        return self.author.name

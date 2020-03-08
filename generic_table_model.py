@@ -31,6 +31,11 @@ class GenericTableModel(QAbstractTableModel):
         if role == Qt.DisplayRole and Qt_Orientation == Qt.Horizontal:
             return self._headers[p_int]
 
+    def refresh_data(self):
+        self.__set_array_data()
+        # self._cached_data = self._crystal_ball_table.rows
+        self.reset()
+
     def data(self, QModelIndex, role=None):  # provides data each time the view requests it
         data_source_list = self._array_data
 

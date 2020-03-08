@@ -10,13 +10,8 @@ class CBTable(object):
         self.__table_model = self.__manager.get_table(table_name)  # needs refactor
         if self.__table_model is not None:
             self._headers = map(lambda x: str(x), self.__table_model.__table__.columns.keys())
-            # if table_name == 'test_result':  # todo: needs refactoring
-            #     self._headers = [item if item != 'test_type_id' else 'test_type_name' for item in self._headers]
-            #     self._headers = [item if item != 'storage_id' else 'storage_marking' for item in self._headers]
-            # elif table_name == 'storage':
-            #     self._headers = [item if item != 'controller_id' else 'controller_marking' for item in
-            #                      self._headers]
-            #     self._headers = [item if item != 'memory_id' else 'memory_marking' for item in self._headers]
+            if table_name == 'book':
+                self._headers = [col.replace('author_id', 'author_marking') for col in self._headers]
             self.__rows = self.__manager.read_all(table_name)  # needs refactor
 
     def insert_and_commit(self, data):
