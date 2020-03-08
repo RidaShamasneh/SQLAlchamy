@@ -7,6 +7,7 @@ class GenericTableView(QTableView):
         self._model = model
         self.setModel(self._model)
         self.__view_name = self._model._table_name
+        self.setColumnHidden(0, True)
 
     @property
     def view_name(self):

@@ -23,13 +23,13 @@ def create_fresh_database():
     declarative_base_class.base.metadata.create_all(engine, checkfirst=True)
     s = session()
 
-    auther_obj_1 = Author(name='Izaat')
-    auther_obj_2 = Author(name='Rida')
-    auther_obj_3 = Author(name='Abu Tamim')
-    book_obj_1 = Book(isbn='0000', title='Islam Between West and East', price=50, author=auther_obj_1)
-    book_obj_2 = Book(isbn='0001', title='Soviets', price=60, author=auther_obj_1)
-    book_obj_3 = Book(isbn='0002', title='Hitler', price=70, author=auther_obj_2)
-    book_obj_4 = Book(isbn='0003', title='ZXY', price=70, author=auther_obj_3)
+    auther_obj_1 = Author(_name='Izaat')
+    auther_obj_2 = Author(_name='Rida')
+    auther_obj_3 = Author(_name='Abu Tamim')
+    book_obj_1 = Book(_isbn='0000', _title='Islam Between West and East', _price=50, author=auther_obj_1)
+    book_obj_2 = Book(_isbn='0001', _title='Soviets', _price=60, author=auther_obj_1)
+    book_obj_3 = Book(_isbn='0002', _title='Hitler', _price=70, author=auther_obj_2)
+    book_obj_4 = Book(_isbn='0003', _title='ZXY', _price=70, author=auther_obj_3)
     s.add(book_obj_1)
     s.add(book_obj_2)
     s.add(book_obj_3)
@@ -41,35 +41,35 @@ def fill_data_in_database():
     print "All Authors:"
     all_authors = s.query(Author).all()
     for author in all_authors:
-        print 'id : %d, name : %s' % (author.id, author.name)
+        print 'id : %d, name : %s' % (author.id, author._name)
     print "--------------------"
 
     print "All Books:"
     all_books = s.query(Book).all()
     for book in all_books:
-        print 'isbn : %s, title : %s, price: %d' % (book.isbn, book.title, book.price)
+        print 'isbn : %s, title : %s, price: %d' % (book._isbn, book._title, book._price)
     print "--------------------"
 
     print "Searching for specific book:"
-    specific_book = s.query(Book).filter(Book.title == 'zxy')
+    specific_book = s.query(Book).filter(Book._title == 'zxy')
     for book in specific_book:
-        print 'isbn : %s, title : %s, price: %d' % (book.isbn, book.title, book.price)
+        print 'isbn : %s, title : %s, price: %d' % (book._isbn, book._title, book._price)
     print "--------------------"
 
     print "Method#1: All Books from specific Author:"
-    all_books_from_author = s.query(Book).join(Book.author).filter(Author.name == 'Izaat')
+    all_books_from_author = s.query(Book).join(Book.author).filter(Author._name == 'Izaat')
     for book in all_books_from_author:
-        print 'isbn : %s, title : %s' % (book.isbn, book.title)
+        print 'isbn : %s, title : %s' % (book._isbn, book._title)
     print "--------------------"
 
     print "Method#2: All Books from specific Author:"
-    result = s.query(Author).filter(Author.name == 'Izaat').one()
+    result = s.query(Author).filter(Author._name == 'Izaat').one()
     for book in result.books:
-        print 'isbn : %s, title : %s' % (book.isbn, book.title)
+        print 'isbn : %s, title : %s' % (book._isbn, book._title)
     print "--------------------"
 
     print "Updating some book price:"
-    specific_book = s.query(Book).filter(Book.title == 'zxy')
+    specific_book = s.query(Book).filter(Book._title == 'zxy')
     for book in specific_book:
         book.price = 123
 
