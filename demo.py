@@ -1,31 +1,15 @@
-from sqlalchemy import Column, String, Integer, VARCHAR, ForeignKey, create_engine
-from sqlalchemy.orm import relationship, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 from sqlalchemy_utils import database_exists, create_database, drop_database
 
-Base = declarative_base()
-engine = create_engine("mysql+mysqlconnector://root:root@localhost:3306/testing_db")
+import declarative_base_class
+from sql_alchemy_classes import Book, Author
+
+engine = create_engine("mysql+mysqlconnector://root:root@localhost:3306/testing_db")  # , echo=True
 session = sessionmaker()
 session.configure(bind=engine)
-Base.metadata.create_all(engine, checkfirst=True)
+declarative_base_class.base.metadata.create_all(engine, checkfirst=True)
 s = session()
-
-
-class Author(Base):
-    __tablename__ = 'author'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(VARCHAR(255), nullable=False)
-    books = relationship("Book")
-
-
-class Book(Base):
-    __tablename__ = 'book'
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    isbn = Column(VARCHAR(255), nullable=False, unique=True)
-    title = Column(String(60), nullable=False)
-    price = Column(Integer, nullable=False)
-    author_id = Column(Integer, ForeignKey(Author.id))
-    author = relationship("Author")
 
 
 def create_fresh_database():
@@ -34,7 +18,9 @@ def create_fresh_database():
     if not database_exists(engine.url):
         create_database(engine.url)
 
-    Base.metadata.create_all(engine, checkfirst=True)
+    session = sessionmaker()
+    session.configure(bind=engine)
+    declarative_base_class.base.metadata.create_all(engine, checkfirst=True)
     s = session()
 
     auther_obj_1 = Author(name='Izaat')
@@ -51,10 +37,7 @@ def create_fresh_database():
     s.commit()
 
 
-if __name__ == '__main__':
-
-    # create_fresh_database()
-
+def fill_data_in_database():
     print "All Authors:"
     all_authors = s.query(Author).all()
     for author in all_authors:
@@ -64,13 +47,13 @@ if __name__ == '__main__':
     print "All Books:"
     all_books = s.query(Book).all()
     for book in all_books:
-        print 'isbn : %s, title : %s' % (book.isbn, book.title)
+        print 'isbn : %s, title : %s, price: %d' % (book.isbn, book.title, book.price)
     print "--------------------"
 
     print "Searching for specific book:"
     specific_book = s.query(Book).filter(Book.title == 'zxy')
     for book in specific_book:
-        print 'isbn : %s, title : %s' % (book.isbn, book.title)
+        print 'isbn : %s, title : %s, price: %d' % (book.isbn, book.title, book.price)
     print "--------------------"
 
     print "Method#1: All Books from specific Author:"
@@ -85,4 +68,24 @@ if __name__ == '__main__':
         print 'isbn : %s, title : %s' % (book.isbn, book.title)
     print "--------------------"
 
+    print "Updating some book price:"
+    specific_book = s.query(Book).filter(Book.title == 'zxy')
+    for book in specific_book:
+        book.price = 123
+
+    print "Deleting some book:"
+    # Returns 1 as deletion_result upon success deletion (i.e. item was found and deleted)
+    # Returns 0 as deletion_result upon failed deletion (e.g. the item was not found)
+    # deletion_result = s.query(Book).filter(Book.title == 'Hitler').delete()
+
+    print "Deleting some Author:"
+    # deletion_result = s.query(Author).filter(Author.name == 'Izaat').delete()
+
+    s.commit()
     s.close()
+
+
+if __name__ == '__main__':
+    create_fresh_database()
+    fill_data_in_database()
+    pass
