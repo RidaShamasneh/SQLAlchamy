@@ -1,4 +1,6 @@
 from collections import OrderedDict
+
+from author_table_model import AuthorTableModel
 from book_table_model import BookTableModel
 
 
@@ -9,7 +11,7 @@ class TableModelFactory(object):
     def init_models():
         # order matters
         TableModelFactory.switcher['book'] = BookTableModel('book')
-        TableModelFactory.switcher['author'] = BookTableModel('author')
+        TableModelFactory.switcher['author'] = AuthorTableModel('author')
 
     @staticmethod
     def get_table_model(table_name):

@@ -2,6 +2,7 @@ import sys
 from PyQt4.QtGui import QMainWindow, QAction, QIcon
 
 from app_constants import AppConstants
+from cb_message_boxes import CBMessageBoxes
 from db_connection import DbConnection
 from generic_table_tab_widget import GenericTableTabWidget
 from gui_constans import GUIConstants
@@ -28,16 +29,19 @@ class MainWindow(QMainWindow):
 
     def __connect_signals(self):
         # self.__back_up_db_action.triggered.connect(DBBackup.export_database)
-        # self.__save_all_tabs.triggered.connect(self.__save_all_tabs_handler)
+        self.__save_all_tabs.triggered.connect(self.__save_all_tabs_handler)
         self.__refresh_all_tabs.triggered.connect(self.__refresh_all_tabs_handler)
         # self.__xml_report_action.triggered.connect(self.__xml_report_handler)
 
+    def __save_all_tabs_handler(self):
+        self.__ui_main_widget.save_all_tabs()
+
     def __refresh_all_tabs_handler(self):
-        # if CBMessageBoxes.prompt_user(icon=CBMessageBoxes.WARNING,
-        #                               title="Refresh Data in all tables",
-        #                               text="Unsaved data will be cleared in all tabs, are you sure you want to continue?") \
-        #         == CBMessageBoxes.NO:
-        #     return
+        if CBMessageBoxes.prompt_user(icon=CBMessageBoxes.WARNING,
+                                      title="Refresh Data in all tables",
+                                      text="Unsaved data will be cleared in all tabs, are you sure you want to continue?") \
+                == CBMessageBoxes.NO:
+            return
         self.__ui_main_widget.refresh_all_tabs()
 
     def refresh_all_tabs(self):

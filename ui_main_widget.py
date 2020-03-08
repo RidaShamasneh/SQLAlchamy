@@ -1,6 +1,9 @@
+from collections import OrderedDict
+
 from PyQt4.QtGui import QWidget, QStatusBar, QLabel, QVBoxLayout, QTabWidget, QMovie, QTabBar
 from PyQt4.QtCore import QSize
 
+from cb_message_boxes import CBMessageBoxes
 from generic_table_tab_widget import GenericTableTabWidget
 from gui_constans import GUIConstants
 from table_model_factory import TableModelFactory
@@ -69,6 +72,28 @@ class UIMainWidget(QWidget):
         self.__main_window.menuBar().setEnabled(is_enabled)
         self.__loading_indicator_label.setHidden(is_enabled)
 
+    def save_all_tabs(self):
+        warnings_list = []
+        '''
+        We need to insert data into DB tables by order; in order to maintain the FK relationships between tables
+        '''
+        tabs_to_save = OrderedDict({})
+        tabs_to_save['book'] = None
+        tabs_to_save['author'] = None
+        for tab in self.__get_specific_type_widgets(GenericTableTabWidget):
+            tabs_to_save[tab.table_view.view_name] = tab
+        self.__window_enabled(False)
+        for tab_name, tab in tabs_to_save.items():
+            if tab is not None:
+                warnings_list.append(tab.save_data(display_warning=False))
+        warnings_list = '\n'.join(filter(None, warnings_list))
+        if warnings_list:
+            CBMessageBoxes.popup_message(icon=CBMessageBoxes.WARNING,
+                                         title="Failure while saving all tabs",
+                                         text="An error occurred while saving all tables.",
+                                         detailed_text=warnings_list)
+        self.__window_enabled(True)
+
     def __get_specific_type_widgets(self, widget_type):
         tabs_count = self.__tab_widget.count()
         for tab_index in range(tabs_count):
@@ -83,9 +108,9 @@ class UIMainWidget(QWidget):
             warnings_list.append(tab.refresh_data(display_warning=False))
 
         warnings_list = '\n'.join(filter(None, warnings_list))
-        # if warnings_list:
-        #     CBMessageBoxes.popup_message(icon=CBMessageBoxes.WARNING,
-        #                                  title="Failure while refreshing all tabs",
-        #                                  text="An error occurred while refreshing database. Please try again later",
-        #                                  detailed_text=warnings_list)
+        if warnings_list:
+            CBMessageBoxes.popup_message(icon=CBMessageBoxes.WARNING,
+                                         title="Failure while refreshing all tabs",
+                                         text="An error occurred while refreshing database. Please try again later",
+                                         detailed_text=warnings_list)
         self.__window_enabled(True)

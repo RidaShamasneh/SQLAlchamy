@@ -30,8 +30,9 @@ class Book(declarative_base_class.base):
     _isbn = Column(VARCHAR(255), nullable=False, unique=True)
     _title = Column(String(60), nullable=False)
     _price = Column(INTEGER, nullable=False)
-    author_id = Column(INTEGER, ForeignKey(Author.id, ondelete='CASCADE', onupdate='CASCADE'))
+    author_id = Column(INTEGER, ForeignKey(Author.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
     author = relationship("Author", lazy='selectin')
+    _author_marking = ''
 
     @property
     def isbn(self):
@@ -60,3 +61,26 @@ class Book(declarative_base_class.base):
     @property
     def author_marking(self):
         return self.author.name
+
+    @author_marking.setter
+    def author_marking(self, val):
+        if val is not None:
+            self._author_marking = str(val)
+            self.author = None
+            self.__set_author_fkey()
+        else:
+            self._author_marking = None
+            self.author_id = None
+            self.author = None
+
+    def __set_author_fkey(self):
+        if self._author_marking is not '' and self._author_marking is not None:
+            # todo: needs refactoring on how to set the id
+            from mysql_connection_manager import MysqlConnectionManager
+            manager = MysqlConnectionManager.getInstance()
+            result = manager.session.query(Author).filter(Author._name == self._author_marking).first()
+            manager.session.close()
+            if result is not None:
+                self.author_id = result.id
+                return
+            raise Exception("{} in table {} is Not Found as primary key".format(self._author_marking, 'Primary'))
