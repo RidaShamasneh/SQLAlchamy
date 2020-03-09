@@ -7,6 +7,8 @@ from table_view_factory import TableViewFactory
 
 
 class GenericTableTabWidget(GenericTabWidget):
+    __filterable_tables = ["book"]
+
     def __init__(self, model, main_window=None):
         super(GenericTableTabWidget, self).__init__(main_window)
         self.__model = model
@@ -33,9 +35,37 @@ class GenericTableTabWidget(GenericTabWidget):
         self.__refresh_data_toolbutton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self._toolbar.addWidget(self.__refresh_data_toolbutton)
 
+        # Filter Button; for tables that supports filtration
+        if model._table_name in self.__filterable_tables:
+            self.__filter_toolbutton = QToolButton(self)
+            self.__filter_toolbutton.setText("Apply Filter")
+            self.__filter_toolbutton.setIcon(QIcon(":/images/filter.ico"))
+            self.__filter_toolbutton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+            self.__filter_toolbutton.setCheckable(True)
+            self._toolbar.addWidget(self.__filter_toolbutton)
+            self.__filter_toolbutton.clicked.connect(self.__filter_toolbutton_toggled_handler)
+
         self.__table_view = TableViewFactory.get_table_view(model=model, tab_widget=self)
         self._main_layout.addWidget(self.__table_view)
         self.__connect_signals()
+
+    def __filter_toolbutton_toggled_handler(self, checked):
+        if not checked:
+            self.__filter_toolbutton.setText("Apply Filter")
+            self.__filter_toolbutton.setIcon(QIcon(":/images/filter.ico"))
+            self.__table_view.disable_horizontal_headers_signals()
+            # enable save, refresh, add row features
+            self.__save_changes_toolbutton.setEnabled(True)
+            self.__refresh_data_toolbutton.setEnabled(True)
+            self.__add_row_toolbutton.setEnabled(True)
+            return
+        self.__filter_toolbutton.setText("Clear Filter")
+        self.__filter_toolbutton.setIcon(QIcon(":/images/clear_filter.png"))
+        self.__table_view.enable_horizontal_headers_signal()
+        # disable save, refresh, add row features
+        self.__save_changes_toolbutton.setEnabled(False)
+        self.__refresh_data_toolbutton.setEnabled(False)
+        self.__add_row_toolbutton.setEnabled(False)
 
     def __connect_signals(self):
         self.__save_changes_toolbutton.clicked.connect(lambda: self.save_data(display_warning=True))

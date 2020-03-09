@@ -6,6 +6,7 @@ from gui_constans import GUIConstants
 '''
 Please do not remove this namespace because it is needed in other places
 '''
+import gui.resources.gui_resources
 import time
 
 from main_window import MainWindow
@@ -23,7 +24,7 @@ def main(args):
     app.setWindowIcon(app_icon)
 
     # splash screen
-    splash = QSplashScreen(QPixmap(":/images/wd_logo_splash.png"), Qt.WindowStaysOnTopHint)
+    splash = QSplashScreen(QPixmap(":/images/logo_splash.png"), Qt.WindowStaysOnTopHint)
     splash.setStyleSheet("font-size: 20px")
     splash.showMessage("{} v{}".format(AppConstants.APP_NAME, "0.0.1"),
                        Qt.AlignBottom | Qt.AlignCenter, Qt.black)

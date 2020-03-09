@@ -30,3 +30,11 @@ class GenericTableView(QTableView):
 
     def custom_ctx_menu_handler(self, pos):
         return
+
+    def enable_horizontal_headers_signal(self):
+        if self.__filterable_csv_headers_list:
+            # Enable section signal: single left click header to add filters
+            self.horizontalHeader().sectionClicked.connect(self.__column_header_sectionclicked_handler)
+            # notify model that filters is enabled to display columns icons
+            self._model.init_filter_data_list()
+            self._model.filter_is_enabled = True, ":/images/filter_grey.png", None
