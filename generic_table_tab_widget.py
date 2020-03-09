@@ -16,6 +16,7 @@ class GenericTableTabWidget(GenericTabWidget):
         self.__add_row_toolbutton.setIcon(QIcon(":images/add.png"))
         self.__add_row_toolbutton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
         self._toolbar.addWidget(self.__add_row_toolbutton)
+        self._toolbar.addSeparator()
 
         # Save Changes to DB button
         self.__save_changes_toolbutton = QToolButton(self)
@@ -25,6 +26,13 @@ class GenericTableTabWidget(GenericTabWidget):
         self._toolbar.addWidget(self.__save_changes_toolbutton)
         self._toolbar.addSeparator()
 
+        # Refresh Data
+        self.__refresh_data_toolbutton = QToolButton(self)
+        self.__refresh_data_toolbutton.setText("Refresh Data")
+        self.__refresh_data_toolbutton.setIcon(QIcon(":images/refresh.png"))
+        self.__refresh_data_toolbutton.setToolButtonStyle(Qt.ToolButtonTextUnderIcon)
+        self._toolbar.addWidget(self.__refresh_data_toolbutton)
+
         self.__table_view = TableViewFactory.get_table_view(model=model, tab_widget=self)
         self._main_layout.addWidget(self.__table_view)
         self.__connect_signals()
@@ -32,7 +40,15 @@ class GenericTableTabWidget(GenericTabWidget):
     def __connect_signals(self):
         self.__save_changes_toolbutton.clicked.connect(lambda: self.save_data(display_warning=True))
         self.__add_row_toolbutton.clicked.connect(self.__add_row_handler)
-        # self.__refresh_data_toolbutton.clicked.connect(self.__refresh_data_handler)
+        self.__refresh_data_toolbutton.clicked.connect(self.__refresh_data_handler)
+
+    def __refresh_data_handler(self):
+        if CBMessageBoxes.prompt_user(icon=CBMessageBoxes.WARNING,
+                                      title="Refresh Data Table",
+                                      text="Unsaved data will be cleared, are you sure you want to continue?") \
+                == CBMessageBoxes.NO:
+            return
+        self.refresh_data()
 
     def refresh_data(self, display_warning=True):
         # if self.__model.table_name in self.__filterable_tables:

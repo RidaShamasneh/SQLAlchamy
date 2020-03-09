@@ -136,6 +136,10 @@ class GenericTableModel(QAbstractTableModel):
     def hyper_link_attributes_list(self):
         return []
 
+    @property
+    def fk_attributes_list(self):
+        return []
+
     def get_cell_value(self, QModelIndex):
         row_index = QModelIndex.row()
         if row_index >= self.array_data_len:
