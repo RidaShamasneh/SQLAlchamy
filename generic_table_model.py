@@ -9,6 +9,10 @@ class GenericTableModel(QAbstractTableModel):
     def __init__(self, table_name):
         super(GenericTableModel, self).__init__()
         self._table_name = table_name
+        self.__filterable_csv_headers_list = []
+        self.__filterable_csv_headers_icons_dict = {}
+        self.__unique_vals_dict = {}
+        self.__filter_is_enabled = (False, None, None)
         self._crystal_ball_table = CBTable(table_name=self._table_name)
         self._headers = map(lambda x: x.title().replace("_", " "), self._crystal_ball_table.headers)
         self.__set_array_data()
@@ -19,8 +23,35 @@ class GenericTableModel(QAbstractTableModel):
         self.__blue_brush = QBrush(QColor(Qt.blue))
         self.__yellow_brush = QBrush(QColor('#ffff99'))
 
+    def init_filter_data_list(self):
+        self._filter_data_list = self._array_data
+
+    def __is_filter_enabled(self):
+        return self.__filter_is_enabled[0]
+
     def __set_array_data(self):
         self._array_data = self._crystal_ball_table.rows
+        self.__fill_unique_vals_dict()
+
+    def __fill_unique_vals_dict(self):
+        for index in self.__filterable_csv_headers_list:
+            self.__unique_vals_dict[index] = []
+            self.__unique_vals_dict[index] = self._fetch_unique_column_vals(index)
+
+    def _column_filter_query(self, index):
+        return None
+
+    def _fetch_unique_column_vals(self, index):
+        result = []
+        query = self._column_filter_query(index)
+        try:
+            result = self._crystal_ball_table.exec_query(query).fetchall()
+        except Exception as e:
+            # todo: report error for user
+            print "An error occurred in fetching filter unique results"
+            print e.message
+        finally:
+            return [str(value) for (value,) in result]
 
     def flags(self, QModelIndex):
         # TODO: needs refactoring; move this block to derived classes
@@ -33,6 +64,8 @@ class GenericTableModel(QAbstractTableModel):
         self.reset()
 
     def rowCount(self, parent=None, *args, **kwargs):
+        if self.__is_filter_enabled():
+            return len(self._filter_data_list)
         return len(self._array_data) + self.__empty_rows_count
 
     def columnCount(self, parent=None, *args, **kwargs):
@@ -41,6 +74,22 @@ class GenericTableModel(QAbstractTableModel):
     @property
     def array_data_len(self):
         return len(self._array_data)
+
+    def start_filter(self, filter_items_dict):
+        if not filter_items_dict:
+            self._filter_data_list = []
+        else:
+            self._filter_data_list = []
+            query = self._start_filter_query(filter_items_dict)
+            try:
+                self._filter_data_list = self._crystal_ball_table.exec_query(query)
+                if self._filter_data_list:
+                    self._filter_data_list = self._filter_data_list.fetchall()
+            except Exception as e:
+                print "An error occurred in starting filter"
+                print e.message
+            # Todo: add finally section
+        self.reset()
 
     def setData(self, QModelIndex, QVariant, role=None):
         column = self._crystal_ball_table.headers[QModelIndex.column()]
@@ -71,6 +120,14 @@ class GenericTableModel(QAbstractTableModel):
     def headerData(self, p_int, Qt_Orientation, role=None):
         if role == Qt.DisplayRole and Qt_Orientation == Qt.Horizontal:
             return self._headers[p_int]
+        elif role == Qt.DecorationRole and self.__filter_is_enabled[0] and \
+                Qt_Orientation == Qt.Horizontal and \
+                p_int in self.__filterable_csv_headers_list:
+            if self.__filter_is_enabled[2] is None:
+                self.__filterable_csv_headers_icons_dict[p_int] = self.__filter_is_enabled[1]
+                return QIcon(self.__filter_is_enabled[1])
+            else:
+                return QIcon(self.__filterable_csv_headers_icons_dict[p_int])
 
     def update_fkeys(self):
         return []
@@ -99,7 +156,7 @@ class GenericTableModel(QAbstractTableModel):
             self.__empty_rows_count = 1
             self._array_data = []
             self._cached_data = []
-            # self.__unique_vals_dict = {}
+            self.__unique_vals_dict = {}
             self.__set_array_data()
             self._cached_data = self._crystal_ball_table.rows
             self.reset()
@@ -151,8 +208,22 @@ class GenericTableModel(QAbstractTableModel):
     def column_name(self, QModelIndex):
         return self._crystal_ball_table.headers[QModelIndex.column()]
 
+    @property
+    def filter_is_enabled(self):
+        return self.__filter_is_enabled
+
+    @filter_is_enabled.setter
+    def filter_is_enabled(self, val):
+        self.__filter_is_enabled = val
+        if self.__filter_is_enabled[2] is not None:
+            self.__filterable_csv_headers_icons_dict[self.__filter_is_enabled[2]] = self.__filter_is_enabled[1]
+        self.reset()
+
     def data(self, QModelIndex, role=None):  # provides data each time the view requests it
-        data_source_list = self._array_data
+        if self.__is_filter_enabled():
+            data_source_list = self._filter_data_list
+        else:
+            data_source_list = self._array_data
 
         if QModelIndex.row() >= len(data_source_list):
             return QVariant()
@@ -165,8 +236,8 @@ class GenericTableModel(QAbstractTableModel):
                 return str(QVariant(getattr(row, column)).toString())
             except Exception as e:
                 return ''
-        # if role == Qt.EditRole and not self.__is_filter_enabled():
-        #     return str(QVariant(getattr(row, column)).toString())
+        if role == Qt.EditRole and not self.__is_filter_enabled():
+            return str(QVariant(getattr(row, column)).toString())
         # Indicate unsaved row
         if role == Qt.BackgroundRole and not self.__compare_row_item(index=QModelIndex.row()):
             return self.__yellow_brush
@@ -191,3 +262,27 @@ class GenericTableModel(QAbstractTableModel):
         if matching_index.isValid():
             return matching_index
         return None
+
+    @property
+    def filterable_csv_headers_list(self):
+        return self.__filterable_csv_headers_list
+
+    @filterable_csv_headers_list.setter
+    def filterable_csv_headers_list(self, val):
+        self.__filterable_csv_headers_list = val
+        self.__fill_unique_vals_dict()
+
+    def get_unique_column_values(self, column_index):
+        if column_index in self.__unique_vals_dict.keys():
+            return self.__unique_vals_dict[column_index]
+
+    @property
+    def unique_vals_dict(self):
+        return self.__unique_vals_dict
+
+    @unique_vals_dict.setter
+    def unique_vals_dict(self, val):
+        self.__unique_vals_dict = val
+
+    def _start_filter_query(self, filter_items_dict):
+        raise NotImplementedError

@@ -5,8 +5,10 @@ from functools import partial
 
 
 class BookTableView(GenericTableView):
+    __filterable_csv_headers_list = [1, 2, 3]
+
     def __init__(self, model, parent):
-        super(BookTableView, self).__init__(model, parent)
+        super(BookTableView, self).__init__(model, parent, self.__filterable_csv_headers_list)
         self._model = model
 
     def custom_ctx_menu_handler(self, pos):

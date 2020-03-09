@@ -7,7 +7,7 @@ from table_view_factory import TableViewFactory
 
 
 class GenericTableTabWidget(GenericTabWidget):
-    __filterable_tables = ["book"]
+    __filterable_tables = ["book", 'author']
 
     def __init__(self, model, main_window=None):
         super(GenericTableTabWidget, self).__init__(main_window)
