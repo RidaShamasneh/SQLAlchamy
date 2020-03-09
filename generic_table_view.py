@@ -1,4 +1,5 @@
-from PyQt4.QtGui import QTableView, QAbstractItemView, QHeaderView
+from PyQt4.QtGui import QTableView, QAbstractItemView, QHeaderView, QMenu
+from PyQt4.QtCore import Qt, QPoint
 
 
 class GenericTableView(QTableView):
@@ -15,7 +16,14 @@ class GenericTableView(QTableView):
         self.setSelectionBehavior(QAbstractItemView.SelectRows)
         # resize headers labels to fit content
         self.horizontalHeader().setResizeMode(QHeaderView.ResizeToContents)
+        self._context_menu = QMenu()
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.custom_ctx_menu_handler)
 
     @property
     def view_name(self):
         return self.__view_name
+
+
+    def custom_ctx_menu_handler(self, pos):
+        return

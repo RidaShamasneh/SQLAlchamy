@@ -7,6 +7,10 @@ class BookTableModel(GenericTableModel):
         super(BookTableModel, self).__init__(table_name)
         self.nullable_list = []
 
+    @property
+    def hyper_link_attributes_list(self):
+        return ['_title']
+
     def get_object(self):
         tmp_object = Book()
         return tmp_object

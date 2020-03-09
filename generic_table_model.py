@@ -136,6 +136,17 @@ class GenericTableModel(QAbstractTableModel):
     def hyper_link_attributes_list(self):
         return []
 
+    def get_cell_value(self, QModelIndex):
+        row_index = QModelIndex.row()
+        if row_index >= self.array_data_len:
+            return
+        row = self._array_data[row_index]
+        column = self._crystal_ball_table.headers[QModelIndex.column()]
+        return getattr(row, column)
+
+    def column_name(self, QModelIndex):
+        return self._crystal_ball_table.headers[QModelIndex.column()]
+
     def data(self, QModelIndex, role=None):  # provides data each time the view requests it
         data_source_list = self._array_data
 
