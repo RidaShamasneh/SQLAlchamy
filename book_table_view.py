@@ -25,6 +25,17 @@ class BookTableView(GenericTableView):
             self._context_menu.addAction(temp_action)
             self._context_menu.popup(QCursor.pos())
 
+        if column in self._model.fk_attributes_list:
+            marking_value = self._model.get_cell_value(index)
+            if not marking_value:
+                return
+            temp_action = QAction("Go to \"{}\" in \"{}\" tab".format(marking_value, column.split("_")[0].capitalize()),
+                                  self)
+            temp_action.triggered.connect(
+                partial(self._search_in_table, column.split("_")[0], index.column(), marking_value))
+            self._context_menu.addAction(temp_action)
+            self._context_menu.popup(QCursor.pos())
+
     def _search_for_files(self, title):
         CBMessageBoxes.popup_message(icon=CBMessageBoxes.INFO,
                                      title="An error occurred",

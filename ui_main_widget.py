@@ -114,3 +114,17 @@ class UIMainWidget(QWidget):
                                          text="An error occurred while refreshing database. Please try again later",
                                          detailed_text=warnings_list)
         self.__window_enabled(True)
+
+    def forward_search_request(self, table, column_search_index, search_token):
+        self.__window_enabled(False)
+        for index, widget in enumerate(self.__get_specific_type_widgets(GenericTableTabWidget)):
+            if widget.table_view.view_name == table:
+                val = widget.search_token(column_search_index, search_token)
+                if val is not None:
+                    self.__tab_widget.setCurrentIndex(index)
+                else:
+                    CBMessageBoxes.popup_message(icon=CBMessageBoxes.WARNING,
+                                                 title="Could not locate item in opened tabs",
+                                                 text="Value is not found in corresponding tab")
+                break  # No need to continue; one instance per table exists
+        self.__window_enabled(True)

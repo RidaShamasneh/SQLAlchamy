@@ -7,6 +7,7 @@ class GenericTableView(QTableView):
         super(GenericTableView, self).__init__(None)
         self._model = model
         self.setModel(self._model)
+        self.__parent = parent
         self.__view_name = self._model._table_name
         # Hide id column
         self.setColumnHidden(0, True)
@@ -24,6 +25,8 @@ class GenericTableView(QTableView):
     def view_name(self):
         return self.__view_name
 
+    def _search_in_table(self, table, column, search_token):
+        self.__parent.froward_search_request_to_main_window(table, column, search_token)
 
     def custom_ctx_menu_handler(self, pos):
         return

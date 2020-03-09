@@ -173,3 +173,17 @@ class GenericTableModel(QAbstractTableModel):
             return self.__hyperlink_font
 
         return QVariant()
+
+    def search_row(self, search_column_index, search_token):
+        proxy = QSortFilterProxyModel()
+        proxy.setSourceModel(self)
+        # TODO: needs refactoring
+        # 1 hard coded value is used based on the assumption that we will use this function to
+        # search for the table_marking column only to server the feature: go from FK to PK
+        search_column_index = 1
+        proxy.setFilterKeyColumn(search_column_index)
+        proxy.setFilterFixedString(search_token)
+        matching_index = proxy.mapToSource(proxy.index(0, 0))
+        if matching_index.isValid():
+            return matching_index
+        return None

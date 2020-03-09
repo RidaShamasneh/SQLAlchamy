@@ -34,7 +34,6 @@ class GenericTableTabWidget(GenericTabWidget):
         self.__add_row_toolbutton.clicked.connect(self.__add_row_handler)
         # self.__refresh_data_toolbutton.clicked.connect(self.__refresh_data_handler)
 
-
     def refresh_data(self, display_warning=True):
         # if self.__model.table_name in self.__filterable_tables:
         #     # disable the feature in case filter is enabled
@@ -84,3 +83,12 @@ class GenericTableTabWidget(GenericTabWidget):
     @property
     def table_view(self):
         return self.__table_view
+
+    def search_token(self, search_col_index, search_token):
+        result_index = self.table_view.model().search_row(search_col_index, search_token)
+        if result_index is not None:
+            self.table_view.selectRow(result_index.row())
+        return result_index
+
+    def froward_search_request_to_main_window(self, table, column_search_index, search_token):
+        self._main_window.forward_search_request(table, column_search_index, search_token)

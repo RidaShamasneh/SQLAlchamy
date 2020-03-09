@@ -11,6 +11,10 @@ class BookTableModel(GenericTableModel):
     def hyper_link_attributes_list(self):
         return ['_title']
 
+    @property
+    def fk_attributes_list(self):
+        return ['author_marking']
+
     def get_object(self):
         tmp_object = Book()
         return tmp_object
