@@ -128,3 +128,15 @@ class UIMainWidget(QWidget):
                                                  text="Value is not found in corresponding tab")
                 break  # No need to continue; one instance per table exists
         self.__window_enabled(True)
+
+    @property
+    def status_bar(self):
+        return self.__status_bar
+
+    @property
+    def status_bar_label(self):
+        return self.__status_bar_label
+
+    @status_bar_label.setter
+    def status_bar_label(self, val):
+        self.__status_bar_label.setText(val)

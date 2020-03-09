@@ -3,6 +3,7 @@ from PyQt4.QtGui import QMainWindow, QAction, QIcon
 
 from app_constants import AppConstants
 from cb_message_boxes import CBMessageBoxes
+from dal.db_backup import DBBackup
 from db_connection import DbConnection
 from generic_table_tab_widget import GenericTableTabWidget
 from gui_constans import GUIConstants
@@ -18,17 +19,17 @@ class MainWindow(QMainWindow):
         try:
             self.__db_connection.initialize_connection()
         except Exception as e:
-            # CBMessageBoxes.popup_message(icon=CBMessageBoxes.CRITICAL,
-            #                              title='Database Connection Error',
-            #                              text='Failure in connecting to configured database. \n App will exit',
-            #                              detailed_text=e.message)
+            CBMessageBoxes.popup_message(icon=CBMessageBoxes.CRITICAL,
+                                         title='Database Connection Error',
+                                         text='Failure in connecting to configured database. \n App will exit',
+                                         detailed_text=e.message)
             sys.exit(0)
 
         self.__setup_ui()
         self.__connect_signals()
 
     def __connect_signals(self):
-        # self.__back_up_db_action.triggered.connect(DBBackup.export_database)
+        self.__back_up_db_action.triggered.connect(DBBackup.export_database)
         self.__save_all_tabs.triggered.connect(self.__save_all_tabs_handler)
         self.__refresh_all_tabs.triggered.connect(self.__refresh_all_tabs_handler)
         # self.__xml_report_action.triggered.connect(self.__xml_report_handler)
@@ -51,11 +52,11 @@ class MainWindow(QMainWindow):
             warnings_list.append(tab.refresh_data(display_warning=False))
 
         warnings_list = '\n'.join(filter(None, warnings_list))
-        # if warnings_list:
-        #     CBMessageBoxes.popup_message(icon=CBMessageBoxes.WARNING,
-        #                                  title="Failure while refreshing all tabs",
-        #                                  text="An error occurred while refreshing database. Please try again later",
-        #                                  detailed_text=warnings_list)
+        if warnings_list:
+            CBMessageBoxes.popup_message(icon=CBMessageBoxes.WARNING,
+                                         title="Failure while refreshing all tabs",
+                                         text="An error occurred while refreshing database. Please try again later",
+                                         detailed_text=warnings_list)
         self.__window_enabled(True)
 
     def __setup_ui(self):
@@ -64,8 +65,16 @@ class MainWindow(QMainWindow):
         self.resize(GUIConstants.MAIN_WINDOW_FRAME_WIDTH, GUIConstants.MAIN_WINDOW_FRAME_HEIGHT)
         self.__application_title = "{} - {} v{}".format(AppConstants.TITLE_STRING,
                                                         AppConstants.APP_NAME,
-                                                        "0.0.1")
+                                                        'v0.0.1')
         self.setWindowTitle(self.__application_title)
+        self.__ui_main_widget.status_bar_label = 'Connected to Database'
+        self.setStatusBar(self.__ui_main_widget.status_bar)
+        # menu_bar
+        self.__file_menu = self.menuBar().addMenu('File')
+        self.__back_up_db_action = QAction(QIcon(":images/export_db.png"), 'Export Database', self)
+        self.__file_menu.addAction(self.__back_up_db_action)
+        self.__xml_report_action = QAction(QIcon(":images/perf_report.png"), 'Open XML Report', self)
+        self.__file_menu.addAction(self.__xml_report_action)
         self.__db_actions_menu = self.menuBar().addMenu('Database')
         self.__save_all_tabs = QAction(QIcon(":images/save_all.ico"), 'Save All Tabs', self)
         self.__db_actions_menu.addAction(self.__save_all_tabs)
