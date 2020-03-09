@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
         self.__ui_main_widget = UIMainWidget(main_window=self)
         self.setCentralWidget(self.__ui_main_widget)
         self.resize(GUIConstants.MAIN_WINDOW_FRAME_WIDTH, GUIConstants.MAIN_WINDOW_FRAME_HEIGHT)
-        self.__application_title = "{} - {} v{}".format(AppConstants.WESTERN_DIGITAL_STRING,
+        self.__application_title = "{} - {} v{}".format(AppConstants.TITLE_STRING,
                                                         AppConstants.APP_NAME,
                                                         "0.0.1")
         self.setWindowTitle(self.__application_title)
