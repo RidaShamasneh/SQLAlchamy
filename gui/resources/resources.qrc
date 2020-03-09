@@ -1,0 +1,18 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file>images/app_icon.ico</file>
+        <file>images/logo_splash.png</file>
+        <file>images/export_db.png</file>
+        <file>images/import_db.png</file>
+        <file>images/save.ico</file>
+        <file>images/save_all.ico</file>
+        <file>images/refresh.png</file>
+        <file>images/add.png</file>
+        <file>images/loading_spinner.gif</file>
+        <file>images/perf_report.png</file>
+        <file>images/filter.ico</file>
+        <file>images/filter_grey.png</file>
+        <file>images/clear_filter.png</file>
+    </qresource>
+</RCC>
