@@ -45,6 +45,15 @@ class GenericTableTabWidget(GenericTabWidget):
             self._toolbar.addWidget(self.__filter_toolbutton)
             self.__filter_toolbutton.clicked.connect(self.__filter_toolbutton_toggled_handler)
 
+        # loading gif spinner gif
+        self.__inprogress_indicator_label = QLabel()
+        self.__search_indicator_movie = QMovie(":/images/loading_spinner.gif")
+        self.__search_indicator_movie.setScaledSize(QSize(24, 24))
+        self.__inprogress_indicator_label.setMovie(self.__search_indicator_movie)
+        self.__inprogress_indicator_label.hide()
+        self._main_layout.addWidget(self.__inprogress_indicator_label)
+        self.__search_indicator_movie.start()
+
         self.__table_view = TableViewFactory.get_table_view(model=model, tab_widget=self)
         self._main_layout.addWidget(self.__table_view)
         self.__connect_signals()
@@ -81,13 +90,13 @@ class GenericTableTabWidget(GenericTabWidget):
         self.refresh_data()
 
     def refresh_data(self, display_warning=True):
-        # if self.__model.table_name in self.__filterable_tables:
-        #     # disable the feature in case filter is enabled
-        #     if self.__filter_toolbutton.isChecked():
-        #         return
+        if self.__model._table_name in self.__filterable_tables:
+            # disable the feature in case filter is enabled
+            if self.__filter_toolbutton.isChecked():
+                return
         e = None
         self.setEnabled(False)
-        # self.__inprogress_indicator_label.show()
+        self.__inprogress_indicator_label.show()
         try:
             self.table_view.model().refresh_data()
         except Exception as e:
@@ -100,20 +109,20 @@ class GenericTableTabWidget(GenericTabWidget):
                                              detailed_text=e)
         finally:
             self.setEnabled(True)
-            # self.__inprogress_indicator_label.hide()
+            self.__inprogress_indicator_label.hide()
         if not display_warning:
             return e
 
     def save_data(self, display_warning=True):
-        # if self.__model.table_name in self.__filterable_tables:
-        #     # disable the feature in case filter is enabled
-        #     if self.__filter_toolbutton.isChecked():
-        #         return
+        if self.__model._table_name in self.__filterable_tables:
+            # disable the feature in case filter is enabled
+            if self.__filter_toolbutton.isChecked():
+                return
         self.setEnabled(False)
-        # self.__inprogress_indicator_label.show()
+        self.__inprogress_indicator_label.show()
         error = self.table_view.model().save_data()
         self.setEnabled(True)
-        # self.__inprogress_indicator_label.hide()
+        self.__inprogress_indicator_label.hide()
 
         if display_warning and error:
             CBMessageBoxes.popup_message(icon=CBMessageBoxes.WARNING,
