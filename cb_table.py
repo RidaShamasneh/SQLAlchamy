@@ -38,3 +38,7 @@ class CBTable(object):
 
     def filter_query(self, binary_expression):
         return self.__manager.session.query(self.__table_model).filter(binary_expression)
+
+    @property
+    def table_model(self):
+        return self.__table_model
