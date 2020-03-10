@@ -15,6 +15,7 @@ class BookTableModel(GenericTableModel):
     def __init__(self, table_name):
         super(BookTableModel, self).__init__(table_name)
         self.nullable_list = []
+        # TODO-Rida: replace these by ORM calls
         self.__column_filter_query_dict = {}
         self.__column_filter_query_dict[1] = "select distinct {} from book;".format(self.__table_column_names[1])
         self.__column_filter_query_dict[2] = "select distinct {} from book;".format(self.__table_column_names[2])

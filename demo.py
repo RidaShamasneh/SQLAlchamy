@@ -51,13 +51,19 @@ def fill_data_in_database():
     print "All Authors:"
     all_authors = s.query(Author).all()
     for author in all_authors:
-        print 'id : %d, name : %s' % (author.id, author._name)
+        print 'id : %d, name : %s' % (author.id, author.name)
+    print "--------------------"
+
+    print "Distinct Authors:"
+    distinct_authors = s.query(Author).join(Book, Author.id == Book.author_id)
+    for author in distinct_authors:
+        print 'author_name: %s' % (author.name)
     print "--------------------"
 
     print "All Books:"
     all_books = s.query(Book).all()
     for book in all_books:
-        print 'isbn : %s, title : %s, price: %d' % (book._isbn, book._title, book._price)
+        print 'isbn : %s, title : %s, price: %d' % (book.isbn, book.title, book.price)
     print "--------------------"
 
     print "Some Books:"
