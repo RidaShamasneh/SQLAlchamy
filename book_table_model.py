@@ -95,6 +95,7 @@ class BookTableModel(GenericTableModel):
         query = self._column_filter_query(index)
         try:
             result = self._crystal_ball_table.exec_query(query).fetchall()
+            #TODO-POC: find a way to all ORM API instead?
             if index == 4:
                 r = self._crystal_ball_table.exec_query(
                     "select count(*) from book where author_id is null").fetchall()
