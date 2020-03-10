@@ -35,3 +35,6 @@ class CBTable(object):
 
     def exec_query(self, query):
         return self.__manager.execute_query(query)
+
+    def filter_query(self, binary_expression):
+        return self.__manager.session.query(self.__table_model).filter(binary_expression)

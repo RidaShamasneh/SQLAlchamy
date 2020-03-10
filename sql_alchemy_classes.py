@@ -39,7 +39,7 @@ class Book(declarative_base_class.base):
     _isbn = Column(VARCHAR(255), nullable=False, unique=True)
     _title = Column(String(60), nullable=False)
     _price = Column(INTEGER, nullable=False)
-    author_id = Column(INTEGER, ForeignKey(Author.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=False)
+    author_id = Column(INTEGER, ForeignKey(Author.id, ondelete='CASCADE', onupdate='CASCADE'), nullable=True)
     author = relationship("Author", lazy='selectin')
     _author_marking = ''
 

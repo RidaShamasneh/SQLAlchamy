@@ -85,9 +85,11 @@ class GenericTableModel(QAbstractTableModel):
             self._filter_data_list = []
             query = self._start_filter_query(filter_items_dict)
             try:
-                self._filter_data_list = self._crystal_ball_table.exec_query(query)
-                if self._filter_data_list:
-                    self._filter_data_list = self._filter_data_list.fetchall()
+                # self._filter_data_list = self._crystal_ball_table.exec_query(query)
+                # if self._filter_data_list:
+                #     self._filter_data_list = self._filter_data_list.fetchall()
+                  if query:
+                    self._filter_data_list = query.all()
             except Exception as e:
                 print "An error occurred in starting filter"
                 print e.message

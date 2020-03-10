@@ -1,3 +1,6 @@
+from operator import and_
+from sqlalchemy import or_
+
 from generic_table_model import GenericTableModel
 from gui.filter.filter_constants import FilterConstants
 from sql_alchemy_classes import Book
@@ -8,6 +11,7 @@ class BookTableModel(GenericTableModel):
     __table_column_names[1] = '_isbn'
     __table_column_names[2] = '_title'
     __table_column_names[3] = '_price'
+    __table_column_names[4] = 'author_id'
 
     def __init__(self, table_name):
         super(BookTableModel, self).__init__(table_name)
@@ -16,6 +20,8 @@ class BookTableModel(GenericTableModel):
         self.__column_filter_query_dict[1] = "select distinct {} from book;".format(self.__table_column_names[1])
         self.__column_filter_query_dict[2] = "select distinct {} from book;".format(self.__table_column_names[2])
         self.__column_filter_query_dict[3] = "select distinct {} from book;".format(self.__table_column_names[3])
+        self.__column_filter_query_dict[
+            4] = "select distinct _name from author inner join book where (author.id = book.author_id)"
 
     @property
     def hyper_link_attributes_list(self):
@@ -25,29 +31,42 @@ class BookTableModel(GenericTableModel):
         if index in self.__column_filter_query_dict.keys():
             return self.__column_filter_query_dict[index]
 
+    def __convert(self, item):
+        for obj in self._array_data:
+            if obj.author_marking == item:
+                return obj.author_id
+
     def _start_filter_query(self, filter_items_dict):  # todo: needs refactor
-        query = "select * from book where "
+        global_binary_expression = None
         for key, vals in filter_items_dict.iteritems():
-            blanks = False
-            added = False
+            column_name = self.__table_column_names[key]
+            instrumented_attribute = getattr(Book, column_name)
+            list_of_items_to_be_filtered_per_column = []
+            is_null_expression = None
             for item in vals.values():
                 if item == FilterConstants.BLANKS_STRING:
-                    query += "{} is null ".format(self.__table_column_names[key])
-                    blanks = True
+                    is_null_expression = instrumented_attribute.is_(None)
+                elif key == 4:
+                    list_of_items_to_be_filtered_per_column.append(self.__convert(item))
                 else:
-                    if blanks:
-                        query += " or "
-                        blanks = False
-                    if not added:
-                        query += self.__table_column_names[key] + " in ('{}')".format(item)
-                        added = True
-                    else:
-                        query = query[:-1]
-                        query += " ,'{}')".format(item)
+                    list_of_items_to_be_filtered_per_column.append(str(item))
 
-            query += " and "
-        query = query[:-len('  and')]
-        return query
+            local_binary_expression = instrumented_attribute.in_(list_of_items_to_be_filtered_per_column)
+            # If blank value is part of the filter, we add it here as an or_ portion to local binary expression
+            if is_null_expression is not None:
+                local_binary_expression = or_(local_binary_expression, is_null_expression)
+            '''
+            Accumulate all BinaryExpressions in global expression operator
+            '''
+            # Special case: for 1st iteration
+            if global_binary_expression is None:
+                global_binary_expression = local_binary_expression
+            # For later iterations, we and_ local binary expression with global one
+            else:
+                global_binary_expression = and_(global_binary_expression, local_binary_expression)
+        # finally, executing it ... :)
+        result = self._crystal_ball_table.filter_query(global_binary_expression)
+        return result
 
     @property
     def fk_attributes_list(self):
