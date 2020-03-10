@@ -56,8 +56,11 @@ class GenericTableModel(QAbstractTableModel):
     def flags(self, QModelIndex):
         # TODO: needs refactoring; move this block to derived classes
         column = self._crystal_ball_table.headers[QModelIndex.column()]
-        # TODO: determine which column is readonly and which is not?
-        return QAbstractTableModel.flags(self, QModelIndex) | Qt.ItemIsEditable
+        if self.__is_filter_enabled():
+            return QAbstractTableModel.flags(self, QModelIndex)
+        if column not in self.read_only_list:
+            return QAbstractTableModel.flags(self, QModelIndex) | Qt.ItemIsEditable
+        return QAbstractTableModel.flags(self, QModelIndex)
 
     def add_empty_row(self):
         self.__empty_rows_count += 1
@@ -262,6 +265,10 @@ class GenericTableModel(QAbstractTableModel):
         if matching_index.isValid():
             return matching_index
         return None
+
+    @property
+    def read_only_list(self):
+        return []
 
     @property
     def filterable_csv_headers_list(self):
