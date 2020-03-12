@@ -27,7 +27,7 @@ class Author(declarative_base_class.base):
         if type(self) is not type(other):
             return False
 
-        return [self.id, self.name] == [other.id, other.name]
+        return [self.name] == [other.name]
 
     def __ne__(self, other):
         return not self.__eq__(other)
