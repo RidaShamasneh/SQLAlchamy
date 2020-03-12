@@ -1,11 +1,11 @@
 import PyQt4
 from PyQt4 import QtCore, QtGui
-from PyQt4.QtGui import QFont
+from PyQt4.QtGui import QFont, QTableWidgetItem
 
 app = QtGui.QApplication([])
 
 columns = ['Column 0', 'Column 1', 'Column 2']
-items = [['Row%s Col%s' % (row, col) for col in range(len(columns))] for row in range(100)]
+items = [['Row%s Col%s' % (row, col) for col in range(len(columns))] for row in range(1)]
 
 view = QtGui.QTableWidget()
 
@@ -50,7 +50,7 @@ ss = "QHeaderView::section {%s}" % str_sub
 
 # ss = "QHeaderView::section {font-weight: %s; color: %s; font-size: %dpx; background-color: %s;}" % \
 #      (font_weight, foreground_color, font_size, background_color)
-view.horizontalHeader().setStyleSheet(ss)
+# view.horizontalHeader().setStyleSheet(ss)
 
 # view.horizontalHeader().setFont(bFont)
 # view.horizontalHeader().setStyleSheet("QHeaderView { font-size: 30pt; }")
@@ -65,6 +65,31 @@ for row, item in enumerate(items):
         item = QtGui.QTableWidgetItem("%s" % column_name)
         view.setItem(row, col, item)
     view.setRowHeight(row, 16)
+
+
+fnt = QFont()
+fnt.setPointSize(15)
+fnt.setBold(True)
+fnt.setFamily("Arial")
+
+item1 = view.horizontalHeaderItem(0)
+item1.setForeground(QtGui.QColor(255, 0, 0))
+item1.setFont(fnt)
+
+item2 = view.horizontalHeaderItem(1)
+item2.setForeground(QtGui.QColor(0, 255, 0))
+item2.setFont(fnt)
+
+item3 = view.horizontalHeaderItem(2)
+item3.setForeground(QtGui.QColor(255, 0, 255))
+
+# item1 = QTableWidgetItem('red')
+# item1.setBackground(QtGui.QColor(255, 0, 0))
+# item1.setForeground(QtGui.QColor(255, 0, 0))
+
+view.setHorizontalHeaderItem(0, item1)
+view.setHorizontalHeaderItem(1, item2)
+view.setHorizontalHeaderItem(2, item3)
 
 view.show()
 app.exec_()
