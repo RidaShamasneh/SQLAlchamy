@@ -1,7 +1,8 @@
 from PyQt4 import QtGui
-from PyQt4.QtGui import QFont
+from PyQt4.QtGui import QFont, QStyleFactory
 
 app = QtGui.QApplication([])
+# app.setStyle (QStyleFactory.create ('Fusion'))
 
 columns = ['Column 0', 'Column 1', 'Column 2']
 items = [['Row%s Col%s' % (row, col) for col in range(len(columns))] for row in range(1)]
