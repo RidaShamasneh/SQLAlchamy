@@ -44,6 +44,14 @@ def create_fresh_database():
     s.add(book_obj_6)
     s.add(book_obj_7)
     s.add(book_obj_8)
+
+    auther_obj_4 = Author(_name='Rida')
+    auther_obj_5 = Author(_name='Ali')
+    auther_obj_6 = Author(_name='')
+    s.add(auther_obj_4)
+    s.add(auther_obj_5)
+    s.add(auther_obj_6)
+
     s.commit()
 
 
@@ -54,10 +62,30 @@ def fill_data_in_database():
         print 'id : %d, name : %s' % (author.id, author.name)
     print "--------------------"
 
-    print "Distinct Authors:"
-    distinct_authors = s.query(Author).join(Book, Author.id == Book.author_id)
-    for author in distinct_authors:
+    print "Authors that have books:"
+    authors = s.query(Author).join(Book, Author.id == Book.author_id)
+    for author in authors:
         print 'author_name: %s' % (author.name)
+    print "--------------------"
+
+    print "Distinct Author names: approach #1 (using distinct in SQL Alchamy)"
+    distinct_author_names = s.query(Author._name).distinct().all()
+    for author_name in distinct_author_names:
+        print 'author_name: %s' % (author_name)
+    print "--------------------"
+
+    print "Distinct Authors: approach #2 (Getting all results and finding distinct names programmatically)"
+    all_authors = s.query(Author).all()
+    distinct_author_names = {author._name for author in all_authors}
+    for author_name in distinct_author_names:
+        print 'author_name: %s' % (author_name)
+    print "--------------------"
+
+    print "Distinct Author names from books table"
+    all_books = s.query(Book).all()
+    distinct_author_names = {book.author_marking for book in all_books}
+    for author_name in distinct_author_names:
+        print 'author_name: %s' % (author_name)
     print "--------------------"
 
     print "All Books:"
